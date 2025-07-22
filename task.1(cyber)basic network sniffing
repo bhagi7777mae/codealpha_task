@@ -1,0 +1,32 @@
+from scapy.all import sniff, IP, Raw
+from scapy.layers.inet import TCP, UDP, ICMP
+
+def process_packet(packet):
+    if IP in packet:
+        src_ip = packet[IP].src
+        dst_ip = packet[IP].dst
+
+        if TCP in packet:
+            protocol = "TCP"
+        elif UDP in packet:
+            protocol = "UDP"
+        elif ICMP in packet:
+            protocol = "ICMP"
+        else:
+            protocol = "OTHER"
+
+        print(f"\n[+] Protocol: {protocol}")
+        print(f"    Source IP: {src_ip}")
+        print(f"    Destination IP: {dst_ip}")
+
+        # Check for and print raw payload
+        if Raw in packet:
+            payload = packet[Raw].load
+            try:
+                print(f"    Payload: {payload.decode(errors='replace')}")
+            except:
+                print(f"    Payload (raw): {payload}")
+
+# Start sniffing
+print("Sniffing packets... Press Ctrl+C to stop.")
+sniff(filter="ip", prn=process_packet, store=0, count=5)
